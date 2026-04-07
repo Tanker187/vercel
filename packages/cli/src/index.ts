@@ -831,6 +831,10 @@ const main = async () => {
           telemetry.trackCliCommandDns(userSuppliedSubCommand);
           func = (await import('./commands-bulk.js')).dns;
           break;
+        case 'edge-config':
+          telemetry.trackCliCommandEdgeConfig(userSuppliedSubCommand);
+          func = (await import('./commands-bulk.js')).edgeConfig;
+          break;
         case 'domains':
           telemetry.trackCliCommandDomains(userSuppliedSubCommand);
           func = (await import('./commands-bulk.js')).domains;
@@ -1002,7 +1006,7 @@ const main = async () => {
         func = func.default;
       }
 
-      if (!telemetryEventStore.hasUserId) {
+      if (!telemetryEventStore.hasUserId && !client.authConfig.userId) {
         earlyGetUserPromise = getUser(client).catch(() => undefined);
       }
 
@@ -1081,6 +1085,7 @@ const main = async () => {
   const postCommandSpan = rootSpan.child('vc.postCommand');
 
   telemetryEventStore.updateTeamId(client.config.currentTeam);
+  telemetryEventStore.updateUserId(client.authConfig.userId);
   if (!telemetryEventStore.hasUserId) {
     const getUserSpan = postCommandSpan.child('vc.postCommand.getUser');
     try {
